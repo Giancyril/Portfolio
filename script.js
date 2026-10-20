@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', function () {
     initMobileMenu();
     initThemeToggle();
     initHeroTyping();
-    initProjectFiltering();
+    initProjects();
     initSkillBars();
     initCopyEmail();
     initContactForm();
@@ -187,40 +187,248 @@ function initHeroTyping() {
 }
 
 // ==========================================================================
-// PROJECT CATEGORY FILTERING
+// PROJECTS SECTION (TABS, GRID, PAGINATION)
 // ==========================================================================
-function initProjectFiltering() {
-    const filterBtns = document.querySelectorAll('.filter-btn');
-    const projectCards = document.querySelectorAll('.project-card');
+function initProjects() {
+    const tabsContainer = document.getElementById('projectTabs');
+    const gridContainer = document.getElementById('projectsGrid');
+    const showMoreBtn = document.getElementById('projectsShowMore');
 
-    if (filterBtns.length === 0 || projectCards.length === 0) return;
+    if (!tabsContainer || !gridContainer) return;
 
-    filterBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            const filterValue = btn.getAttribute('data-filter');
+    const INITIAL_VISIBLE = 8;
+    const STEP = 8;
+    const state = {
+        category: 'all',
+        visible: INITIAL_VISIBLE
+    };
 
-            filterBtns.forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
+    const categories = window.PROJECT_CATEGORIES || [];
+    const projects = window.PROJECTS || [];
 
-            projectCards.forEach(card => {
-                const cardCategory = card.getAttribute('data-category');
+    const catMap = new Map();
+    categories.forEach(c => catMap.set(c.id, c));
 
-                if (filterValue === 'all' || cardCategory === filterValue) {
-                    card.style.display = 'flex';
-                    setTimeout(() => {
-                        card.style.opacity = '1';
-                        card.style.transform = 'translateY(0) scale(1)';
-                    }, 50);
-                } else {
-                    card.style.opacity = '0';
-                    card.style.transform = 'translateY(15px) scale(0.96)';
-                    setTimeout(() => {
-                        card.style.display = 'none';
-                    }, 300);
-                }
-            });
+    function getFiltered() {
+        if (state.category === 'all') return projects;
+        return projects.filter(p => p.category === state.category);
+    }
+
+    function createPlaceholder(project, cat) {
+        const thumb = document.createElement('div');
+        thumb.className = 'project-thumb project-thumb--placeholder';
+
+        const icon = document.createElement('i');
+        icon.className = (cat && cat.icon) ? cat.icon : 'fa-solid fa-code';
+        icon.setAttribute('aria-hidden', 'true');
+
+        const nameSpan = document.createElement('span');
+        nameSpan.className = 'placeholder-label';
+        nameSpan.textContent = project.name;
+
+        thumb.appendChild(icon);
+        thumb.appendChild(nameSpan);
+        return thumb;
+    }
+
+    function createThumb(project) {
+        const cat = catMap.get(project.category);
+        if (!project.image) {
+            return createPlaceholder(project, cat);
+        }
+
+        const thumb = document.createElement('div');
+        thumb.className = 'project-thumb';
+
+        const img = document.createElement('img');
+        img.src = project.image;
+        img.alt = `${project.name} Screenshot`;
+        img.loading = 'lazy';
+        img.decoding = 'async';
+        img.width = 640;
+        img.height = 360;
+
+        img.addEventListener('error', function () {
+            const placeholder = createPlaceholder(project, cat);
+            thumb.replaceWith(placeholder);
+        }, { once: true });
+
+        thumb.appendChild(img);
+        return thumb;
+    }
+
+    function renderGrid() {
+        gridContainer.innerHTML = '';
+        const filtered = getFiltered();
+        const visibleList = filtered.slice(0, state.visible);
+        const fragment = document.createDocumentFragment();
+
+        visibleList.forEach((project, index) => {
+            const card = document.createElement('article');
+            card.className = 'project-card is-entering';
+            card.style.setProperty('--i', index);
+
+            card.appendChild(createThumb(project));
+
+            const body = document.createElement('div');
+            body.className = 'project-card-body';
+
+            const meta = document.createElement('div');
+            meta.className = 'project-meta';
+
+            const cat = catMap.get(project.category);
+            const catBadge = document.createElement('span');
+            catBadge.className = 'project-category-badge';
+            catBadge.innerHTML = `<i class="${cat ? cat.icon : 'fa-solid fa-tag'}" aria-hidden="true"></i> <span>${cat ? cat.label : project.category}</span>`;
+            meta.appendChild(catBadge);
+
+            if (project.featured) {
+                const featBadge = document.createElement('span');
+                featBadge.className = 'project-featured-badge';
+                featBadge.innerHTML = '<i class="fa-solid fa-star" aria-hidden="true"></i> Featured';
+                meta.appendChild(featBadge);
+            }
+            body.appendChild(meta);
+
+            const title = document.createElement('h3');
+            title.className = 'project-card-title';
+            title.textContent = project.name;
+            body.appendChild(title);
+
+            const desc = document.createElement('p');
+            desc.className = 'project-card-desc';
+            desc.textContent = project.description;
+            body.appendChild(desc);
+
+            if (project.tags && project.tags.length > 0) {
+                const tagsWrap = document.createElement('div');
+                tagsWrap.className = 'project-tags';
+                project.tags.slice(0, 4).forEach(tag => {
+                    const tagSpan = document.createElement('span');
+                    tagSpan.className = 'tech-tag';
+                    tagSpan.textContent = tag;
+                    tagsWrap.appendChild(tagSpan);
+                });
+                body.appendChild(tagsWrap);
+            }
+
+            const btn = document.createElement('a');
+            btn.className = 'btn-outline';
+            btn.href = `https://github.com/Giancyril/${encodeURIComponent(project.name)}`;
+            btn.target = '_blank';
+            btn.rel = 'noopener noreferrer';
+            btn.innerHTML = '<i class="fa-brands fa-github" aria-hidden="true"></i> View GitHub';
+            body.appendChild(btn);
+
+            card.appendChild(body);
+            fragment.appendChild(card);
         });
-    });
+
+        gridContainer.appendChild(fragment);
+    }
+
+    function updateShowMore() {
+        if (!showMoreBtn) return;
+        const filtered = getFiltered();
+        const remaining = filtered.length - state.visible;
+        if (remaining > 0) {
+            showMoreBtn.hidden = false;
+            showMoreBtn.textContent = `Show more projects (${remaining} remaining)`;
+        } else {
+            showMoreBtn.hidden = true;
+        }
+    }
+
+    function selectTab(categoryId, focusTab = false) {
+        state.category = categoryId;
+        state.visible = INITIAL_VISIBLE;
+
+        const tabs = tabsContainer.querySelectorAll('.project-tab');
+        tabs.forEach(tab => {
+            const match = tab.dataset.category === categoryId;
+            tab.setAttribute('aria-selected', match ? 'true' : 'false');
+            tab.tabIndex = match ? 0 : -1;
+            if (match && focusTab) {
+                tab.focus();
+            }
+        });
+
+        renderGrid();
+        updateShowMore();
+    }
+
+    function renderTabs() {
+        tabsContainer.innerHTML = '';
+        const tabDefs = [
+            { id: 'all', label: 'All', count: projects.length },
+            ...categories.map(c => ({
+                id: c.id,
+                label: c.label,
+                count: projects.filter(p => p.category === c.id).length
+            }))
+        ];
+
+        const fragment = document.createDocumentFragment();
+        tabDefs.forEach(tab => {
+            const tabBtn = document.createElement('button');
+            tabBtn.type = 'button';
+            tabBtn.className = 'project-tab';
+            tabBtn.setAttribute('role', 'tab');
+            tabBtn.setAttribute('id', `tab-${tab.id}`);
+            tabBtn.setAttribute('aria-controls', 'projectsGrid');
+            tabBtn.dataset.category = tab.id;
+            const isActive = tab.id === state.category;
+            tabBtn.setAttribute('aria-selected', isActive ? 'true' : 'false');
+            tabBtn.tabIndex = isActive ? 0 : -1;
+            tabBtn.innerHTML = `${tab.label} <span class="tab-count">${tab.count}</span>`;
+
+            tabBtn.addEventListener('click', () => {
+                selectTab(tab.id, false);
+            });
+
+            fragment.appendChild(tabBtn);
+        });
+
+        tabsContainer.appendChild(fragment);
+
+        tabsContainer.addEventListener('keydown', (e) => {
+            const tabs = Array.from(tabsContainer.querySelectorAll('.project-tab'));
+            const currentIndex = tabs.findIndex(tab => tab === document.activeElement);
+            if (currentIndex === -1) return;
+
+            let nextIndex = null;
+            if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+                e.preventDefault();
+                nextIndex = (currentIndex + 1) % tabs.length;
+            } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+                e.preventDefault();
+                nextIndex = (currentIndex - 1 + tabs.length) % tabs.length;
+            } else if (e.key === 'Home') {
+                e.preventDefault();
+                nextIndex = 0;
+            } else if (e.key === 'End') {
+                e.preventDefault();
+                nextIndex = tabs.length - 1;
+            }
+
+            if (nextIndex !== null) {
+                const nextTab = tabs[nextIndex];
+                selectTab(nextTab.dataset.category, true);
+            }
+        });
+    }
+
+    if (showMoreBtn) {
+        showMoreBtn.addEventListener('click', () => {
+            state.visible += STEP;
+            renderGrid();
+            updateShowMore();
+        });
+    }
+
+    renderTabs();
+    renderGrid();
+    updateShowMore();
 }
 
 // ==========================================================================
@@ -325,7 +533,7 @@ function initContactForm() {
 // BUTTON RIPPLE EFFECT
 // ==========================================================================
 function initRippleEffect() {
-    const buttons = document.querySelectorAll('.btn-primary, .btn-secondary, .btn-submit, .filter-btn');
+    const buttons = document.querySelectorAll('.btn-primary, .btn-secondary, .btn-submit, .project-tab');
 
     buttons.forEach(button => {
         button.addEventListener('click', function (e) {
@@ -351,7 +559,7 @@ function initRippleEffect() {
 // SCROLL REVEAL ANIMATIONS
 // ==========================================================================
 function initScrollAnimations() {
-    const animatedElements = document.querySelectorAll('.section-header, .experience-card, .project-card, .skill-item, .contact-info-card, .contact-form-container');
+    const animatedElements = document.querySelectorAll('.section-header, .experience-card, .skill-item, .contact-info-card, .contact-form-container');
     if (animatedElements.length === 0) return;
 
     const observer = new IntersectionObserver((entries) => {

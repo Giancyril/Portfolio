@@ -149,112 +149,19 @@
         <div class="container">
             <div class="section-header">
                 <h2 class="section-title">Featured <span class="gradient-text">Projects</span></h2>
-                <p class="section-subtitle">A closer look at the platforms I'm most proud of building.</p>
+                <p class="section-subtitle">Browse everything I've built. Filter by category.</p>
             </div>
 
-            <div class="featured-projects-list">
-
-                <div class="featured-project-card">
-                    <div class="featured-project-visual">
-                        <img src="./pulse.png" alt="Pulse AI Analytics Platform">
-                    </div>
-                    <div class="featured-project-body">
-                        <span class="featured-project-tag">AI Platform</span>
-                        <h3 class="featured-project-title">Pulse</h3>
-                        <p class="featured-project-description">
-                            AI-powered data analytics platform chat with spreadsheets and SQL databases in natural
-                            language to generate queries, dashboards, and business insights, with automated data
-                            profiling, forecasting, and real-time metric alerting. Built with FastAPI, Next.js, and
-                            Google Gemini.
-                        </p>
-                        <div class="featured-project-tags">
-                            <span class="tech-tag">Python</span>
-                            <span class="tech-tag">OpenAI</span>
-                            <span class="tech-tag">SQL</span>
-                            <span class="tech-tag">Analytics</span>
-                        </div>
-                        <a href="https://github.com/Giancyril/Pulse" target="_blank" class="btn-outline">
-                            <i class="fa-brands fa-github"></i> View GitHub
-                        </a>
-                    </div>
-                </div>
-
-                <div class="featured-project-card">
-                    <div class="featured-project-visual">
-                        <img src="./blueprint.png" alt="Blueprint Architecture AI">
-                    </div>
-                    <div class="featured-project-body">
-                        <span class="featured-project-tag">AI Platform</span>
-                        <h3 class="featured-project-title">Blueprint</h3>
-                        <p class="featured-project-description">
-                            AI-powered system architecture reviewer upload a diagram (digital export or hand-drawn
-                            sketch) and get structured feedback on scalability, reliability, bottlenecks, and design
-                            trade-offs, plus cost estimation, security auditing, IaC generation, and chaos simulation.
-                            Built with Next.js, Gemini Vision, and Mermaid.js.
-                        </p>
-                        <div class="featured-project-tags">
-                            <span class="tech-tag">Python</span>
-                            <span class="tech-tag">Computer Vision</span>
-                            <span class="tech-tag">Architecture AI</span>
-                            <span class="tech-tag">React</span>
-                        </div>
-                        <a href="https://github.com/Giancyril/ArchCheck" target="_blank" class="btn-outline">
-                            <i class="fa-brands fa-github"></i> View GitHub
-                        </a>
-                    </div>
-                </div>
-
-                <div class="featured-project-card">
-                    <div class="featured-project-visual">
-                        <img src="./synthis.png" alt="Synthis AI Research Assistant">
-                    </div>
-                    <div class="featured-project-body">
-                        <span class="featured-project-tag">AI Platform</span>
-                        <h3 class="featured-project-title">Synthis</h3>
-                        <p class="featured-project-description">
-                            AI-powered research assistant that plans multi-query searches, retrieves and verifies web
-                            sources, and synthesizes grounded, cited reports built with FastAPI, Gemini, and React.
-                        </p>
-                        <div class="featured-project-tags">
-                            <span class="tech-tag">TypeScript</span>
-                            <span class="tech-tag">RAG Pipeline</span>
-                            <span class="tech-tag">LLMs</span>
-                            <span class="tech-tag">Node.js</span>
-                        </div>
-                        <a href="https://github.com/Giancyril/Synthis" target="_blank" class="btn-outline">
-                            <i class="fa-brands fa-github"></i> View GitHub
-                        </a>
-                    </div>
-                </div>
-
-                <div class="featured-project-card">
-                    <div class="featured-project-visual">
-                        <img src="./debrief.png" alt="Debrief AI Meeting Summarizer">
-                    </div>
-                    <div class="featured-project-body">
-                        <span class="featured-project-tag">AI Platform</span>
-                        <h3 class="featured-project-title">Debrief</h3>
-                        <p class="featured-project-description">
-                            Production-grade AI Meeting Intelligence Platform. Features Gemini 2.5 native audio
-                            transcription, grounded action item & decision extraction with source traceability,
-                            zero-fabrication guarantees, automated follow-up email drafting & Markdown/text export.
-                        </p>
-                        <div class="featured-project-tags">
-                            <span class="tech-tag">Python</span>
-                            <span class="tech-tag">FastAPI</span>
-                            <span class="tech-tag">Gemini Audio</span>
-                            <span class="tech-tag">Transcription</span>
-                        </div>
-                        <a href="https://github.com/Giancyril/Debrief" target="_blank" class="btn-outline">
-                            <i class="fa-brands fa-github"></i> View GitHub
-                        </a>
-                    </div>
-                </div>
-
-            </div>
-
-            <div class="view-all-projects-wrap">
-                <a href="https://github.com/Giancyril?tab=repositories" target="_blank" class="btn-primary">
+            <div class="project-tabs" id="projectTabs" role="tablist" aria-label="Project categories"></div>
+            <div class="projects-grid" id="projectsGrid" role="tabpanel" aria-live="polite"></div>
+            <noscript>
+                <p class="section-subtitle">Enable JavaScript to browse projects, or visit my <a
+                        href="https://github.com/Giancyril?tab=repositories">GitHub</a>.</p>
+            </noscript>
+            <div class="projects-actions">
+                <button class="btn-secondary" id="projectsShowMore" type="button" hidden></button>
+                <a href="https://github.com/Giancyril?tab=repositories" target="_blank" rel="noopener noreferrer"
+                    class="btn-primary">
                     <i class="fa-brands fa-github"></i> View All Projects on GitHub
                 </a>
             </div>
@@ -585,7 +492,8 @@
     <!-- Toast Notification Container -->
     <div class="toast-container" id="toastContainer"></div>
 
-    <!-- Main Script -->
+    <!-- Scripts -->
+    <script src="projects-data.js"></script>
     <script src="script.js"></script>
 </body>
 
