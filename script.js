@@ -52,8 +52,8 @@ function initThemeToggle() {
         }
     }
 
-    // Initial state setup
-    const initialLight = savedTheme === 'light' || (!savedTheme && !prefersDark);
+    // Default to dark unless user explicitly chose light before
+    const initialLight = savedTheme === 'light';
     setLightMode(initialLight);
 
     toggleBtn.addEventListener('click', function () {
@@ -149,9 +149,9 @@ function initHeroTyping() {
     if (!tagline) return;
 
     const roles = [
-        "Developer",
-        "UI/UX Designer",
-        "Concept Artist"
+        "Full Stack Developer",
+        "AI Agent Developer",
+        "Software Engineer"
     ];
 
     let roleIndex = 0;
