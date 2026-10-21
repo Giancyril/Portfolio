@@ -233,8 +233,19 @@ function initProjects() {
 
     function createThumb(project) {
         const cat = catMap.get(project.category);
+        const repoUrl = `https://github.com/Giancyril/${encodeURIComponent(project.name)}`;
+
+        const thumbLink = document.createElement('a');
+        thumbLink.className = 'project-thumb-link';
+        thumbLink.href = repoUrl;
+        thumbLink.target = '_blank';
+        thumbLink.rel = 'noopener noreferrer';
+        thumbLink.setAttribute('aria-label', `View ${project.name} repository on GitHub`);
+        thumbLink.setAttribute('tabindex', '-1');
+
         if (!project.image) {
-            return createPlaceholder(project, cat);
+            thumbLink.appendChild(createPlaceholder(project, cat));
+            return thumbLink;
         }
 
         const thumb = document.createElement('div');
@@ -254,7 +265,8 @@ function initProjects() {
         }, { once: true });
 
         thumb.appendChild(img);
-        return thumb;
+        thumbLink.appendChild(thumb);
+        return thumbLink;
     }
 
     function renderGrid() {
@@ -264,6 +276,8 @@ function initProjects() {
         const fragment = document.createDocumentFragment();
 
         visibleList.forEach((project, index) => {
+            const repoUrl = `https://github.com/Giancyril/${encodeURIComponent(project.name)}`;
+
             const card = document.createElement('article');
             card.className = 'project-card is-entering';
             card.style.setProperty('--i', index);
@@ -282,17 +296,26 @@ function initProjects() {
             catBadge.innerHTML = `<i class="${cat ? cat.icon : 'fa-solid fa-tag'}" aria-hidden="true"></i> <span>${cat ? cat.label : project.category}</span>`;
             meta.appendChild(catBadge);
 
-            if (project.featured) {
-                const featBadge = document.createElement('span');
-                featBadge.className = 'project-featured-badge';
-                featBadge.innerHTML = '<i class="fa-solid fa-star" aria-hidden="true"></i> Featured';
-                meta.appendChild(featBadge);
-            }
+            const metaLink = document.createElement('a');
+            metaLink.className = 'project-meta-link';
+            metaLink.href = repoUrl;
+            metaLink.target = '_blank';
+            metaLink.rel = 'noopener noreferrer';
+            metaLink.setAttribute('aria-label', `Open ${project.name} on GitHub`);
+            metaLink.setAttribute('title', 'View Source on GitHub');
+            metaLink.innerHTML = '<i class="fa-brands fa-github" aria-hidden="true"></i>';
+            meta.appendChild(metaLink);
+
             body.appendChild(meta);
 
             const title = document.createElement('h3');
             title.className = 'project-card-title';
-            title.textContent = project.name;
+            const titleLink = document.createElement('a');
+            titleLink.href = repoUrl;
+            titleLink.target = '_blank';
+            titleLink.rel = 'noopener noreferrer';
+            titleLink.textContent = project.name;
+            title.appendChild(titleLink);
             body.appendChild(title);
 
             const desc = document.createElement('p');
@@ -312,13 +335,18 @@ function initProjects() {
                 body.appendChild(tagsWrap);
             }
 
+            const footer = document.createElement('div');
+            footer.className = 'project-card-footer';
+
             const btn = document.createElement('a');
-            btn.className = 'btn-outline';
-            btn.href = `https://github.com/Giancyril/${encodeURIComponent(project.name)}`;
+            btn.className = 'project-link-btn';
+            btn.href = repoUrl;
             btn.target = '_blank';
             btn.rel = 'noopener noreferrer';
-            btn.innerHTML = '<i class="fa-brands fa-github" aria-hidden="true"></i> View GitHub';
-            body.appendChild(btn);
+            btn.innerHTML = '<span>View Repository</span> <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>';
+            footer.appendChild(btn);
+
+            body.appendChild(footer);
 
             card.appendChild(body);
             fragment.appendChild(card);
@@ -533,7 +561,7 @@ function initContactForm() {
 // BUTTON RIPPLE EFFECT
 // ==========================================================================
 function initRippleEffect() {
-    const buttons = document.querySelectorAll('.btn-primary, .btn-secondary, .btn-submit, .project-tab');
+    const buttons = document.querySelectorAll('.btn-primary, .btn-secondary, .btn-submit');
 
     buttons.forEach(button => {
         button.addEventListener('click', function (e) {
@@ -551,6 +579,10 @@ function initRippleEffect() {
             if (existingRipple) existingRipple.remove();
 
             button.appendChild(circle);
+
+            circle.addEventListener('animationend', () => {
+                circle.remove();
+            }, { once: true });
         });
     });
 }
